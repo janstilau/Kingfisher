@@ -57,6 +57,7 @@ extension UIViewController: KingfisherActionAlertPopup {
     }
 }
 
+// 这是给 UIViewController 添加的 Extension, 所以直接就是所有的 VC 都可以使用. 
 extension UIViewController  {
     func setupOperationNavigationBar() {
         navigationItem.rightBarButtonItem =
