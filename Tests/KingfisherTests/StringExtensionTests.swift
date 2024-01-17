@@ -1,10 +1,3 @@
-//
-//  StringExtensionTests.swift
-//  Kingfisher
-//
-//  Created by Wei Wang on 16/8/14.
-//  Copyright © 2019 Wei Wang. All rights reserved.
-//
 
 import XCTest
 @testable import Kingfisher
