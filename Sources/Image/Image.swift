@@ -195,6 +195,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImage {
             let rep = NSBitmapImageRep(cgImage: cgImage)
             return rep.representation(using: .png, properties: [:])
         #else
+        // 直接使用, 系统的方法
             return base.pngData()
         #endif
     }
@@ -236,6 +237,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImage {
             case .PNG: data = pngRepresentation()
             case .JPEG: data = jpegRepresentation(compressionQuality: compressionQuality)
             case .GIF: data = gifRepresentation()
+                // 重新画一遍, 然后 png 化
             case .unknown: data = normalized.kf.pngRepresentation()
             }
             

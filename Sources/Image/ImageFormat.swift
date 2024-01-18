@@ -17,6 +17,7 @@ public enum ImageFormat {
     /// GIF image format.
     case GIF
     
+    // 固定的几个值. 提前定义出来, 方便 Data 进行判断
     struct HeaderData {
         static var PNG: [UInt8] = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]
         static var JPEG_SOI: [UInt8] = [0xFF, 0xD8]
@@ -58,6 +59,7 @@ public enum ImageFormat {
 extension Data: KingfisherCompatibleValue {}
 
 // MARK: - Misc Helpers
+// 对于二进制数据来说, 可以根据 Data 的前两个字符, 来判断它的类型
 extension KingfisherWrapper where Base == Data {
     /// Gets the image format corresponding to the data.
     public var imageFormat: ImageFormat {

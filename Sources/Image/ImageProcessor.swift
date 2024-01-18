@@ -14,6 +14,7 @@ import UIKit
 ///          processing on this `image` and return the result image.
 /// - data:  Input data. The processor should provide a way to apply
 ///          processing on this `data` and return the result image.
+//
 public enum ImageProcessItem {
     
     /// Input image. The processor should provide a way to apply
@@ -26,6 +27,7 @@ public enum ImageProcessItem {
 }
 
 /// An `ImageProcessor` would be used to convert some downloaded data to an image.
+// 如何将, Data 变为 UIImage.
 public protocol ImageProcessor {
     /// Identifier of the processor. It will be used to identify the processor when 
     /// caching and retrieving an image. You might want to make sure that processors with

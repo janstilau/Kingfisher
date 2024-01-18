@@ -10,8 +10,10 @@ import UIKit
 /// An `CacheSerializer` is used to convert some data to an image object after
 /// retrieving it from disk storage, and vice versa, to convert an image to data object
 /// for storing to the disk storage.
+
+// 用来做图片的序列化和反序列化.
+
 public protocol CacheSerializer {
-    
     /// Gets the serialized data from a provided image
     /// and optional original data for caching to disk.
     ///
@@ -48,6 +50,13 @@ public extension CacheSerializer {
 /// Represents a basic and default `CacheSerializer` used in Kingfisher disk cache system.
 /// It could serialize and deserialize images in PNG, JPEG and GIF format. For
 /// image other than these formats, a normalized `pngRepresentation` will be used.
+
+// 设计出了一套接口, 然后一定要实现一个 Defualt 的版本
+// 设计出了这套接口, 是为了可以进行替换. 是给别人用的.
+
+/*
+ Defualt 的序列化器, 还是使用系统提供的原生方案
+ */
 public struct DefaultCacheSerializer: CacheSerializer {
     
     /// The default general cache serializer used across Kingfisher's cache.

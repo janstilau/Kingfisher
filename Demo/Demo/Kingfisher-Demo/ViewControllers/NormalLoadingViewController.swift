@@ -8,6 +8,7 @@ class NormalLoadingViewController: UICollectionViewController {
         super.viewDidLoad()
         title = "Loading"
         setupOperationNavigationBar()
+        
     }
 }
 
@@ -33,7 +34,7 @@ extension NormalLoadingViewController {
     {
         let imageView = (cell as! ImageCollectionViewCell).cellImageView!
         let url = ImageLoader.sampleImageURLs[indexPath.row]
-        // 使用了组合式的方式, 进行了各种的配置. 
+        // 使用了组合式的方式, 进行了各种的配置.
         KF.url(url)
             .fade(duration: 1)
             .loadDiskFileSynchronously()

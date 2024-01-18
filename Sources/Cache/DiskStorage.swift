@@ -1,13 +1,14 @@
 
 import Foundation
 
-
 /// Represents a set of conception related to storage which stores a certain type of value in disk.
 /// This is a namespace for the disk storage types. A `Backend` with a certain `Config` will be used to describe the
 /// storage. See these composed types for more information.
 
 // 使用 Enum 当做 NameSpace 的案例.
 public enum DiskStorage {
+    
+    // 直接使用了 Data 进行存储, 然后使用 File 的 Attribute 进行过期时间的管理.
     
     /// Represents a storage back-end for the `DiskStorage`. The value is serialized to data
     /// and stored as file in the file system under a specified location.

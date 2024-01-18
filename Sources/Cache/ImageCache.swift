@@ -160,6 +160,8 @@ open class ImageCache {
     
     private let ioQueue: DispatchQueue
     
+    // ImageCache 里面的状态很少. 或者说, 所有的状态, 都在 MemoryStorage 和 DiskStorage 里面.
+    
     /// Closure that defines the disk cache path from a given path and cacheName.
     public typealias DiskCachePathClosure = (URL, String) -> URL
     
@@ -260,6 +262,7 @@ open class ImageCache {
         self.init(memoryStorage: memoryStorage, diskStorage: diskStorage)
     }
     
+    // 使用系统的 1/4 的内存.
     private static func createMemoryStorage() -> MemoryStorage.Backend<KFCrossPlatformImage> {
         let totalMemory = ProcessInfo.processInfo.physicalMemory
         let costLimit = totalMemory / 4
@@ -289,6 +292,9 @@ open class ImageCache {
         NotificationCenter.default.removeObserver(self)
     }
     
+    
+    
+    // 下面就是一直在使用的公共的方法了.
     // MARK: Storing Images
     
     open func store(_ image: KFCrossPlatformImage,
@@ -296,11 +302,13 @@ open class ImageCache {
                     forKey key: String,
                     options: KingfisherParsedOptionsInfo,
                     toDisk: Bool = true,
+                    // 这个 completionHandler 会使用 options 里面的 callback queue 进行执行.
                     completionHandler: ((CacheStoreResult) -> Void)? = nil)
     {
         let identifier = options.processor.identifier
         let callbackQueue = options.callbackQueue
         
+        // 如果, imageProcessor 有 id 值, 那么在存储的时候, 也会使用到这个 id 值.
         let computedKey = key.computedKey(with: identifier)
         // Memory storage should not throw.
         memoryStorage.storeNoThrow(value: image, forKey: computedKey, expiration: options.memoryCacheExpiration)
@@ -314,6 +322,7 @@ open class ImageCache {
         }
         
         ioQueue.async {
+            // 在 IOQueue 里面, 才进行磁盘相关的方法的调用. 
             let serializer = options.cacheSerializer
             if let data = serializer.data(with: image, original: original) {
                 self.syncStoreToDisk(
@@ -651,6 +660,7 @@ open class ImageCache {
     
     /// Clears the memory storage of this cache.
     @objc public func clearMemoryCache() {
+        // 在内存吃紧的时候, 把 memoryStorage 中的内容进行清空.
         memoryStorage.removeAll()
     }
     
@@ -720,6 +730,8 @@ open class ImageCache {
     /// Clears the expired images from disk storage when app is in background. This is an async operation.
     /// In most cases, you should not call this method explicitly.
     /// It will be called automatically when `UIApplicationDidEnterBackgroundNotification` received.
+    ///
+    // 在客户端到后台之后, 会自动触发这里的逻辑.
     @objc public func backgroundCleanExpiredDiskCache() {
         // if 'sharedApplication()' is unavailable, then return
         guard let sharedApplication = KingfisherWrapper<UIApplication>.shared else { return }
@@ -862,9 +874,12 @@ open class ImageCache {
 // MARK: - For App Extensions
 extension UIApplication: KingfisherCompatible { }
 extension KingfisherWrapper where Base: UIApplication {
+    // KingfisherWrapper<UIApplication>.shared
+    // 是这样调用的. static 的方式.
     public static var shared: UIApplication? {
         let selector = NSSelectorFromString("sharedApplication")
         guard Base.responds(to: selector) else { return nil }
+        // takeUnretainedValue
         return Base.perform(selector).takeUnretainedValue() as? UIApplication
     }
 }
