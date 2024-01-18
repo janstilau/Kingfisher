@@ -14,17 +14,25 @@ extension Notification.Name {
     /// A list of removed hashes (files) could be retrieved by accessing the array under
     /// `KingfisherDiskCacheCleanedHashKey` key in `userInfo` of the notification object you received.
     /// By checking the array, you could know the hash codes of files are removed.
+    ///
+    /// 当磁盘缓存被清理时，无论是因为缓存文件过期还是总大小超过允许的最大大小，都会发送此通知。
+    ///
+    /// 此通知的 `object` 是发送通知的 `ImageCache` 对象。
+    /// 通过访问通知对象的 `userInfo` 中 `KingfisherDiskCacheCleanedHashKey` 键下的数组，可以获取已删除的哈希（文件）的列表。
+    /// 通过检查数组，您可以了解已删除的文件的哈希码。
     public static let KingfisherDidCleanDiskCache =
     Notification.Name("com.onevcat.Kingfisher.KingfisherDidCleanDiskCache")
 }
 
 /// Key for array of cleaned hashes in `userInfo` of `KingfisherDidCleanDiskCacheNotification`.
+// 对于全局变量来说, 可以接受的是, 使用一个全局的不变值.
 public let KingfisherDiskCacheCleanedHashKey = "com.onevcat.Kingfisher.cleanedHash"
 
 /// Cache type of a cached image.
 /// - none: The image is not cached yet when retrieving it.
 /// - memory: The image is cached in memory.
 /// - disk: The image is cached in disk.
+// 这是一个常见的 Enum, 在很多的地方, 都使用到了.
 public enum CacheType {
     /// The image is not cached yet when retrieving it.
     case none
@@ -43,6 +51,8 @@ public enum CacheType {
 }
 
 /// Represents the caching operation result.
+// 对于 StoreResult 来说, Result 不需要传递 Data 出来, 所需要的只是 Success, 和 fail 的判断.
+// 所以它的 SuccessData 是 Void, Error 则是根据 Case 的值进行变化.
 public struct CacheStoreResult {
     
     /// The cache result for memory cache. Caching an image to memory will never fail.
@@ -58,6 +68,7 @@ extension KFCrossPlatformImage: CacheCostCalculable {
     public var cacheCost: Int { return kf.cost }
 }
 
+// DataTransformable 就是对于 Data 的封装, 所以要主动实现一下.
 extension Data: DataTransformable {
     public func toData() throws -> Data {
         return self
@@ -76,6 +87,8 @@ extension Data: DataTransformable {
 /// - disk: The image can be retrieved from disk cache.
 /// - memory: The image can be retrieved memory cache.
 /// - none: The image does not exist in the cache.
+// 使用 Cache 进行图片获取的 Result 类.
+// 使用 Enum 当做盒子来用的又一个示例.
 public enum ImageCacheResult {
     
     /// The image can be retrieved from disk cache.
@@ -99,6 +112,7 @@ public enum ImageCacheResult {
     
     /// Returns the corresponding `CacheType` value based on the result type of `self`.
     public var cacheType: CacheType {
+        // 就算是带有关联值, 使用 switch case 的时候, 其实也不用关心这些关联值.
         switch self {
         case .disk: return .disk
         case .memory: return .memory
@@ -114,6 +128,13 @@ public enum ImageCacheResult {
 /// While a default image cache object will be used if you prefer the extension methods of Kingfisher, you can create
 /// your own cache object and configure its storages as your need. This class also provide an interface for you to set
 /// the memory and disk storage config.
+//
+/// 表示一个混合缓存系统，由一个 `MemoryStorage.Backend` 和一个 `DiskStorage.Backend` 组成。
+/// `ImageCache` 是一个高级抽象，用于将图像及其数据存储到内存和磁盘中，并从中检索它们。
+///
+/// 虽然如果您更喜欢使用 Kingfisher 的扩展方法，将使用默认的图像缓存对象，但您也可以创建自己的缓存对象并根据需要配置其存储。
+/// 该类还提供了一个接口，让您可以设置内存和磁盘存储的配置。
+
 open class ImageCache {
     
     // MARK: Singleton
@@ -122,6 +143,9 @@ open class ImageCache {
     /// for any of your customize cache.
     public static let `default` = ImageCache(name: "default")
     
+    
+    // ImageCache 是一个管理类, 真正的操作, 还是交给了对应的执行类.
+    // 在真正的逻辑内部, 其实就不会使用太多的抽象类了
     
     // MARK: Public Properties
     /// The `MemoryStorage.Backend` object used in this cache. This storage holds loaded images in memory with a

@@ -25,6 +25,7 @@ private var imageFrameCountKey: Void?
 private var imageSourceKey: Void?
 
 // MARK: - Image Properties
+// 使用 Wrapper 的方式, 给 UIImage 增加了一系列的扩展方法.
 extension KingfisherWrapper where Base: KFCrossPlatformImage {
     private(set) var animatedImageData: Data? {
         get { return getAssociatedObject(base, &animatedImageDataKey) }
@@ -85,6 +86,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImage {
     }
 
     // Bitmap memory cost with bytes.
+    // 这里是按照了, 图片真实的在内存里面的用量进行的计算. 
     var cost: Int {
         let pixel = Int(size.width * size.height * scale * scale)
         guard let cgImage = cgImage else {

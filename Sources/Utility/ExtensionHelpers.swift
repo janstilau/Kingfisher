@@ -75,6 +75,7 @@ extension RectCorner {
 #endif
 
 extension Date {
+    // 这种, 特定的属性的扩展, 可以让编写代码更加的顺畅. 
     var isPast: Bool {
         return isPast(referenceDate: Date())
     }
