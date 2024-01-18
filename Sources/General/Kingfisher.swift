@@ -2,6 +2,8 @@
 import Foundation
 import ImageIO
 
+// 这种写法非常常见, 主要就是为了处理平台的差异性.
+// 在整个类库里面, 使用的其实是 CrossPlatform 相关的类, 因为这个类库主要是为了跨平台使用的.
 #if os(macOS)
 import AppKit
 public typealias KFCrossPlatformImage = NSImage
@@ -10,6 +12,7 @@ public typealias KFCrossPlatformColor = NSColor
 public typealias KFCrossPlatformImageView = NSImageView
 public typealias KFCrossPlatformButton = NSButton
 #else
+
 import UIKit
 public typealias KFCrossPlatformImage = UIImage
 public typealias KFCrossPlatformColor = UIColor

@@ -4,6 +4,10 @@ import Foundation
 /// Represents an image resource at a certain url and a given cache key.
 /// Kingfisher will use a `Resource` to download a resource from network and cache it with the cache key when
 /// using `Source.network` as its image setting source.
+
+// Resource 这个抽象, 主要就是为了表现, 从网络下降过来的数据.
+// 在 KF 里面, 各个接口都是面对的是抽象接口
+// 在 Swfit 里面, 各个实体对象, 会实现这些抽象接口, 这种设计的好处是, 实现方用自己的设计, 而使用方则是直接使用原始的数据类型. 都没有负担.
 public protocol Resource {
     
     /// The key used in cache.
@@ -18,6 +22,8 @@ extension Resource {
     /// Converts `self` to a valid `Source` based on its `downloadURL` scheme. A `.provider` with
     /// `LocalFileImageDataProvider` associated will be returned if the URL points to a local file. Otherwise,
     /// `.network` is returned.
+    
+    // 各个数据类型, 应该主动的提供它相配合的数据类型之间的转化. 这在自己的工作里面, 也是经常会用到.
     public func convertToSource(overrideCacheKey: String? = nil) -> Source {
         let key = overrideCacheKey ?? cacheKey
         return downloadURL.isFileURL ?
@@ -62,6 +68,8 @@ extension KF {
 /// URL conforms to `Resource` in Kingfisher.
 /// The `absoluteString` of this URL is used as `cacheKey`. And the URL itself will be used as `downloadURL`.
 /// If you need customize the url and/or cache key, use `ImageResource` instead.
+// 使用抽象接口, 一定要把原来想要抽象出来的数据类型, 进行相关的协议的实现.
+// 不能影响到, 原有的数据类型的使用.
 extension URL: Resource {
     public var cacheKey: String { return isFileURL ? localFileCacheKey : absoluteString }
     public var downloadURL: URL { return self }
@@ -82,10 +90,13 @@ extension URL {
         var validComponents: [String] = []
         for part in pathComponents.reversed() {
             validComponents.append(part)
+            // 从后向前的顺序. 直到发现了标识.
             if part.hasSuffix(".app") || part.hasSuffix(".appex") {
                 break
             }
         }
+        // 然后给这个路径, 添加固定的前缀.
+        // Self 这种, 是很常见的.
         let fixedPath = "\(Self.localFileCacheKeyPrefix)/\(validComponents.reversed().joined(separator: "/"))"
         if let q = query {
             return "\(fixedPath)?\(q)"

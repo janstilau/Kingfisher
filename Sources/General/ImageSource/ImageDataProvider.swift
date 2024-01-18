@@ -5,6 +5,8 @@ import Foundation
 /// `Source.provider` source. Compared to `Source.network` member, it gives a chance
 /// to load some image data in your own way, as long as you can provide the data
 /// representation for the image.
+// 使用自己的方式, 记性图片的加载. 这个方式, 主要就是实现了 func data(handler: @escaping (Result<Data, Error>) -> Void)
+// 所以实际上这里也是可以使用异步的方式进行获取.
 public protocol ImageDataProvider {
     
     /// The key used in cache.
@@ -12,7 +14,8 @@ public protocol ImageDataProvider {
     
     /// Provides the data which represents image. Kingfisher uses the data you pass in the
     /// handler to process images and caches it for later use.
-    ///
+    
+    // 统一使用了回调的方式, 来进行数据的返回.
     /// - Parameter handler: The handler you should call when you prepared your data.
     ///                      If the data is loaded successfully, call the handler with
     ///                      a `.success` with the data associated. Otherwise, call it
@@ -34,6 +37,10 @@ public extension ImageDataProvider {
         .provider(self)
     }
 }
+
+/*
+ 作为一个类库, 需要提供一些基本的实现类, 来完成自己抽象的实现. 
+ */
 
 /// Represents an image data provider for loading from a local file URL on disk.
 /// Uses this type for adding a disk image to Kingfisher. Compared to loading it
@@ -72,6 +79,8 @@ public struct LocalFileImageDataProvider: ImageDataProvider {
     /// The key used in cache.
     public var cacheKey: String
 
+    // 直接是就是使用 fileURL 的读取.
+    // 要习惯使用 Result. 
     public func data(handler:@escaping (Result<Data, Error>) -> Void) {
         loadingQueue.execute {
             handler(Result(catching: { try Data(contentsOf: fileURL) }))
@@ -84,6 +93,7 @@ public struct LocalFileImageDataProvider: ImageDataProvider {
     public var data: Data {
         get async throws {
             try await withCheckedThrowingContinuation { continuation in
+                // 还是使用 loadingQueue.execute , 不过不是用 handler 的方法回传了, 而是使用 continuation 的方式.
                 loadingQueue.execute {
                     do {
                         let data = try Data(contentsOf: fileURL)
@@ -109,6 +119,7 @@ public struct Base64ImageDataProvider: ImageDataProvider {
 
     // MARK: Public Properties
     /// The encoded Base64 string for the image.
+    // Base64 这种方式, 还是经常使用到的.
     public let base64String: String
 
     // MARK: Initializers
@@ -128,6 +139,7 @@ public struct Base64ImageDataProvider: ImageDataProvider {
     /// The key used in cache.
     public var cacheKey: String
 
+    // base64 的解析, 数据都在本地, 直接就是 handler 的调用了.
     public func data(handler: (Result<Data, Error>) -> Void) {
         let data = Data(base64Encoded: base64String)!
         handler(.success(data))
@@ -135,6 +147,7 @@ public struct Base64ImageDataProvider: ImageDataProvider {
 }
 
 /// Represents an image data provider for a raw data object.
+// 最彻底的方式, 直接就是使用了 Image Data.
 public struct RawImageDataProvider: ImageDataProvider {
 
     // MARK: Public Properties

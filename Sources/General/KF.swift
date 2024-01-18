@@ -20,9 +20,8 @@ import TVUIKit
 #endif
 
 /*
- 
+ 建造者模式, 在这个类库里面的使用.
  */
-
 /// A helper type to create image setting tasks in a builder pattern.
 /// Use methods in this type to create a `KF.Builder` instance and configure image tasks there.
 public enum KF {
@@ -31,6 +30,7 @@ public enum KF {
     /// - Parameter source: The `Source` object defines data information from network or a data provider.
     /// - Returns: A `KF.Builder` for future configuration. After configuring the builder, call `set(to:)`
     ///            to start the image loading.
+    // 建造者模式, 最后一定要用一个函数, 来触发最终的建造过程.
     public static func source(_ source: Source?) -> KF.Builder {
         Builder(source: source)
     }
@@ -81,6 +81,8 @@ public enum KF {
 extension KF {
 
     /// A builder class to configure an image retrieving task and set it to a holder view or component.
+    
+    // 一个建造者, 基本的设计思路就是, 进行各种配置项的存储, 然后最后会在某个方法里面, 使用相关数据进行构建. 
     public class Builder {
         private let source: Source?
 
@@ -92,6 +94,7 @@ extension KF {
 
         public var options = KingfisherParsedOptionsInfo(KingfisherManager.shared.defaultOptions)
 
+        // 通过这三项, 为 Builder 对象, 存储对应的回调.
         public let onFailureDelegate = Delegate<KingfisherError, Void>()
         public let onSuccessDelegate = Delegate<RetrieveImageResult, Void>()
         public let onProgressDelegate = Delegate<(Int64, Int64), Void>()
@@ -100,6 +103,7 @@ extension KF {
             self.source = source
         }
 
+        // 这两项, 作为真正的闭包回调, 传递给外界. 
         private var resultHandler: ((Result<RetrieveImageResult, KingfisherError>) -> Void)? {
             {
                 switch $0 {

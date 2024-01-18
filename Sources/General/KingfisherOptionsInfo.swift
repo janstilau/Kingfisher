@@ -15,6 +15,8 @@ extension Array where Element == KingfisherOptionsInfoItem {
 }
 
 /// Represents the available option items could be used in `KingfisherOptionsInfo`.
+// 将所有的数据, 都包装成为 KingfisherOptionsInfoItem, 更多的是想用 KingfisherOptionsInfo, 也就是数组的方式供外界使用.
+// 其实这些没有必然的关系. 
 public enum KingfisherOptionsInfoItem {
     
     /// Kingfisher will use the associated `ImageCache` object when handling related operations,
@@ -239,6 +241,15 @@ public enum KingfisherOptionsInfoItem {
     case lowDataMode(Source?)
 }
 
+/*
+ KingfisherOptionsInfoItem 是一组可选项的定义，而 KingfisherParsedOptionsInfo 是这些选项的解析结果，它包含了具体的配置信息。当你使用 Kingfisher 库的方法时，你可以通过传递 KingfisherOptionsInfo 对象来配置各种选项，而库内部则会将其解析为 KingfisherParsedOptionsInfo 以方便处理。
+ 
+ 虽然直接使用 KingfisherParsedOptionsInfo 也是可能的，但引入 KingfisherOptionsInfo 的设计使得使用者可以更自然地配置选项，而无需关心内部的具体解析细节。这样的设计可以在提供灵活性的同时，通过解析过程进行性能上的优化。
+ 
+ 从我个人的理解是, KingfisherParsedOptionsInfo 是一个需要大量配置的类, 但是 KingfisherOptionsInfoItem 是一个只需要极小的代价配置的类.
+ 在真正使用的时候, 传递一个比较简单的数据, 要比传递一个庞大的数据要好用的多, 就算这个庞大的数据有各种默认值, 将这个放大的数据暴露出去, 也不是一个好的方式.
+ */
+
 // Improve performance by parsing the input `KingfisherOptionsInfo` (self) first.
 // So we can prevent the iterating over the options array again and again.
 /// The parsed options info used across Kingfisher methods. Each property in this type corresponds a case member
@@ -285,6 +296,8 @@ public struct KingfisherParsedOptionsInfo {
 
     var onDataReceived: [DataReceivingSideEffect]? = nil
     
+    
+    //
     public init(_ info: KingfisherOptionsInfo?) {
         guard let info = info else { return }
         for option in info {

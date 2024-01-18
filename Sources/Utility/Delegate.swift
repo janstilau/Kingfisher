@@ -47,6 +47,7 @@ public class Delegate<Input, Output> {
     public init() {}
 
     private var block: ((Input) -> Output?)?
+    
     public func delegate<T: AnyObject>(on target: T, block: ((T, Input) -> Output)?) {
         self.block = { [weak target] input in
             guard let target = target else { return nil }
@@ -58,6 +59,7 @@ public class Delegate<Input, Output> {
         return block?(input)
     }
 
+    // 一个可调用对象的适配.
     public func callAsFunction(_ input: Input) -> Output? {
         return call(input)
     }

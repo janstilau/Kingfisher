@@ -405,12 +405,12 @@
 		D12AB6B0215D2BB50013BA68 /* General */ = {
 			isa = PBXGroup;
 			children = (
+				D12AB6B3215D2BB50013BA68 /* KingfisherManager.swift */,
 				D1A1CC98219FAB3500263AD8 /* ImageSource */,
 				D12AB6B1215D2BB50013BA68 /* Kingfisher.swift */,
 				D18B3221251852E100662F63 /* KF.swift */,
 				D1132C9625919F69003E528D /* KFOptionsSetter.swift */,
 				D12AB6B2215D2BB50013BA68 /* KingfisherError.swift */,
-				D12AB6B3215D2BB50013BA68 /* KingfisherManager.swift */,
 				D12AB6B4215D2BB50013BA68 /* KingfisherOptionsInfo.swift */,
 			);
 			path = General;

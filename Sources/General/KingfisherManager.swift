@@ -62,6 +62,7 @@ public typealias DownloadTaskUpdatedBlock = ((_ newTask: DownloadTask?) -> Void)
 /// Main manager class of Kingfisher. It connects Kingfisher downloader and cache,
 /// to provide a set of convenience methods to use Kingfisher for tasks.
 /// You can use this class to retrieve an image via a specified URL from web or cache.
+// 这个类库的入口对象.
 public class KingfisherManager {
 
     /// Represents a shared manager used across Kingfisher.
@@ -84,9 +85,15 @@ public class KingfisherManager {
     /// You can also passing other options for each image task by sending an `options` parameter
     /// to Kingfisher's APIs. The per image options will overwrite the default ones,
     /// if the option exists in both.
+    /// 管理器使用的默认选项。这些选项将在 Kingfisher 管理器相关的方法以及所有视图扩展方法中使用。
+    /// 您还可以通过向 Kingfisher 的 API 发送一个 `options` 参数为每个图像任务传递其他选项。
+    /// 如果在默认选项和每个图像任务选项中都存在某个选项，则每个图像任务中的选项将覆盖默认选项。
+    // 所有的 API, 传递过来的 options 的数据, 最终都是要和 defaultOptions 进行一次合并的操作.
+    // 这个 defaultOptions 是一个可以重新赋值的, 也就是说 App 可以将这个值进行更改, 来整体的调整一下, 整个 App 使用 KF 的时候的行为.
     public var defaultOptions = KingfisherOptionsInfo.empty
     
     // Use `defaultOptions` to overwrite the `downloader` and `cache`.
+    // downloader, cache 是特殊的两个数据. 不应该被 defaultOptions 所影响. 
     private var currentDefaultOptions: KingfisherOptionsInfo {
         return [.downloader(downloader), .targetCache(cache)] + defaultOptions
     }
@@ -102,6 +109,8 @@ public class KingfisherManager {
     /// - Parameters:
     ///   - downloader: The image downloader used to download images.
     ///   - cache: The image cache which stores memory and disk images.
+    // 从这里来看, 里面的工具类就两种, 就是 downloader 和 cahcher.
+    // 然后所有的其他的 Options, 其实是存储在 defaultOptions 里面的. 所以, 实际上 manager 里面还是存储了所有需要的数据.
     public init(downloader: ImageDownloader, cache: ImageCache) {
         self.downloader = downloader
         self.cache = cache
@@ -132,6 +141,7 @@ public class KingfisherManager {
     ///    This method will first check whether the requested `resource` is already in cache or not. If cached,
     ///    it returns `nil` and invoke the `completionHandler` after the cached image retrieved. Otherwise, it
     ///    will download the `resource`, store it in cache, then call `completionHandler`.
+    // 经常使用的一个方法, 一般来说, 这个 Resource 会是一个 URL. 然后传递一个 completionHandler.
     @discardableResult
     public func retrieveImage(
         with resource: Resource,

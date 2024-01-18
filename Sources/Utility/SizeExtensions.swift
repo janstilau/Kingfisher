@@ -2,6 +2,9 @@
 import CoreGraphics
 
 extension CGSize: KingfisherCompatibleValue {}
+
+// 通过这种方式, 给 CGSize.kf 添加功能.
+// 这种方式, 要比直接给 CGSize 添加功能更好. 
 extension KingfisherWrapper where Base == CGSize {
     
     /// Returns a size by resizing the `base` size to a target size under a given content mode.

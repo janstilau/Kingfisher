@@ -10,6 +10,12 @@ import MobileCoreServices
 import CoreServices
 #endif
 
+/*
+ 
+ ChatGPT
+ AVAssetImageGenerator 是 AVFoundation 框架中的一个类，用于从 AVAsset 对象中生成静态图像。AVAsset 代表了一个音频或视频资源，而 AVAssetImageGenerator 允许你从这个资源中抽取一帧或多帧图像。
+ */
+
 /// A data provider to provide thumbnail data from a given AVKit asset.
 public struct AVAssetImageDataProvider: ImageDataProvider {
 
@@ -35,6 +41,7 @@ public struct AVAssetImageDataProvider: ImageDataProvider {
     }
 
     /// The cache key used by `self`.
+    // URL 本身就代表了一份资源, 但是 AVAsset 是一段连续的图片资源, 所以它的 cacheKey 需要添加时间戳的成分.
     public var cacheKey: String {
         return "\(internalKey)_\(time.seconds)"
     }
@@ -77,6 +84,7 @@ public struct AVAssetImageDataProvider: ImageDataProvider {
         self.init(assetURL: assetURL, time: time)
     }
 
+    // 实现抽象协议的接口, 使用 AVAssetImageGenerator 来处理.
     public func data(handler: @escaping (Result<Data, Error>) -> Void) {
         assetImageGenerator.generateCGImagesAsynchronously(forTimes: [NSValue(time: time)]) {
             (requestedTime, image, imageTime, result, error) in
