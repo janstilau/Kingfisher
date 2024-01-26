@@ -21,6 +21,7 @@ public enum CallbackQueue {
     // async 到 main queue. 或者在 mainqueue 直接触发.
     case mainCurrentOrAsync
     /// Do not change the calling queue for closure.
+    // 不进行线程的调度, 直接原来在哪个队列, 就在哪个队列里面. 
     case untouch
     /// Dispatches to a specified `DispatchQueue`.
     // 使用指定的 Queue.

@@ -511,7 +511,7 @@ open class ImageCache {
     
     // MARK: Getting Images
     
-    // 
+    //
     /// Gets an image for a given key from the cache, either from memory storage or disk storage.
     ///
     /// - Parameters:
@@ -533,9 +533,11 @@ open class ImageCache {
         guard let completionHandler = completionHandler else { return }
         
         // Try to check the image from memory cache first.
+        // 内存里面可以获取.
         if let image = retrieveImageInMemoryCache(forKey: key, options: options) {
             callbackQueue.execute { completionHandler(.success(.memory(image))) }
         } else if options.fromMemoryCacheOrRefresh {
+            // 不进行磁盘数据的提取.
             callbackQueue.execute { completionHandler(.success(.none)) }
         } else {
             
@@ -554,6 +556,7 @@ open class ImageCache {
                     // Cache the disk image to memory.
                     // We are passing `false` to `toDisk`, the memory cache does not change
                     // callback queue, we can call `completionHandler` without another dispatch.
+                    // 还是使用了 store 方法, 但是, 只是为了存图到内存里面.
                     var cacheOptions = options
                     cacheOptions.callbackQueue = .untouch
                     self.store(
@@ -712,6 +715,7 @@ open class ImageCache {
         cleanExpiredDiskCache(completion: handler)
     }
     
+    // 每个工具对象, 都有自己的对于过期的数据处理办法.
     /// Clears the expired images from disk storage.
     open func cleanExpiredMemoryCache() {
         memoryStorage.removeExpired()
@@ -727,6 +731,7 @@ open class ImageCache {
     /// - Parameter handler: A closure which is invoked when the cache clearing operation finishes.
     ///                      This `handler` will be called from the main queue.
     open func cleanExpiredDiskCache(completion handler: (() -> Void)? = nil) {
+        // 主动地触发, disk 的清理.
         ioQueue.async {
             do {
                 var removed: [URL] = []
