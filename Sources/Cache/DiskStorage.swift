@@ -6,6 +6,7 @@ import Foundation
 /// storage. See these composed types for more information.
 
 // 使用 Enum 当做 NameSpace 的案例.
+// DiskStorage 的各个部分, 是通过 NameSpace 下的各个实际类发挥的作用.
 public enum DiskStorage {
     
     // 直接使用了 Data 进行存储, 然后使用 File 的 Attribute 进行过期时间的管理.
@@ -20,6 +21,9 @@ public enum DiskStorage {
     
     // 对于 manager 来说, 专门的进行一个 Config 类的设计, 是一个非常通用的模式.
     // 使用一个, 统一的地方进行各种的取值, 要比类内各种杂乱无章的属性提取要好的多.
+    
+    // 这里使用了泛型.
+    // 但是这里的 T, 主要是为了固定类型, 而不是在里面存储一个抽象的工具.
     public class Backend<T: DataTransformable> {
         /// The config used for this disk storage.
         public var config: Config
@@ -456,7 +460,6 @@ public enum DiskStorage {
 
 extension DiskStorage {
     /// Represents the config used in a `DiskStorage`.
-    //
     public struct Config {
         
         /// The file size limit on disk of the storage in bytes. 0 means no limit.

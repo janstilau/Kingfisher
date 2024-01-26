@@ -37,6 +37,11 @@ public protocol ImageProcessor {
     /// - Note: Do not supply an empty string for a customized processor, which is already reserved by
     /// the `DefaultImageProcessor`. It is recommended to use a reverse domain name notation string of
     /// your own for the identifier.
+    
+    /// 处理器的标识符。它将用于在缓存和检索图像时标识处理器。
+    /// 你可能希望确保具有相同属性/功能的处理器具有相同的标识符，以便可以使用正确的键检索正确的处理过的图像。
+    ///
+    /// - 注意: 不要为自定义处理器提供一个空字符串，这已经被 `DefaultImageProcessor` 保留。建议使用你自己的反向域名符号字符串作为标识符。
     var identifier: String { get }
 
     /// Processes the input `ImageProcessItem` with this processor.
@@ -53,6 +58,18 @@ public protocol ImageProcessor {
     ///         to keep the processing pipeline continuing.
     /// - Note: Most processor only supports CG-based images. watchOS is not supported for processors containing
     ///         a filter, the input image will be returned directly on watchOS.
+    /// 使用此处理器处理输入的 `ImageProcessItem`。
+    ///
+    /// - Parameters:
+    ///   - item: 将由 `self` 处理的输入项。
+    ///   - options: 处理项目时解析的选项。
+    /// - Returns: 处理后的图像。
+    ///
+    /// - 注意: 如果在将输入项转换为图像时处理失败，则返回值应为 `nil`。
+    ///         如果处理调用者收到 `nil`，将报告错误并停止处理流程。
+    ///         如果处理流程对你的流程不是关键的，那么当输入项已经是图像（`.image` 情况）且处理中存在任何错误时，
+    ///         你可以返回输入图像本身以保持处理管道的继续。
+    /// - 注意: 大多数处理器仅支持基于 CG 的图像。不支持在 watchOS 上包含滤镜的处理器，输入图像将直接返回。
     func process(item: ImageProcessItem, options: KingfisherParsedOptionsInfo) -> KFCrossPlatformImage?
 }
 

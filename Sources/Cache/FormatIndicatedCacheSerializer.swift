@@ -32,10 +32,12 @@ import UIKit
 /// // Otherwise, the corner part would be filled by white color (since JPEG does not contain an alpha channel).
 /// imageView.kf.setImage(with: url, options: optionsInfo)
 /// ````
+// 可以进行不同类型的图片的转化. 主要是存储的时候, 将 Png 变为 jpg, gif 傻傻的.
 public struct FormatIndicatedCacheSerializer: CacheSerializer {
     
     /// A `FormatIndicatedCacheSerializer` which converts image from and to PNG format. If the image cannot be
     /// represented by PNG format, it will fallback to its real format which is determined by `original` data.
+        // 将图片变为 Png 进行存储.
     public static let png = FormatIndicatedCacheSerializer(imageFormat: .PNG, jpegCompressionQuality: nil)
     
     /// A `FormatIndicatedCacheSerializer` which converts image from and to JPEG format. If the image cannot be
@@ -77,6 +79,7 @@ public struct FormatIndicatedCacheSerializer: CacheSerializer {
         }
         
         // generate data with indicated image format
+        // 如果, 能够将图片, 变为指定的 imageFormat, 那么万事大吉.
         if let data = imageData(withFormat: imageFormat) {
             return data
         }
@@ -84,10 +87,12 @@ public struct FormatIndicatedCacheSerializer: CacheSerializer {
         let originalFormat = original?.kf.imageFormat ?? .unknown
         
         // generate data with original image's format
+        // 如果, 指定的 data 获取不到, 那么用原来的 data 进行.
         if originalFormat != imageFormat, let data = imageData(withFormat: originalFormat) {
             return data
         }
         
+        // 最终, 重新绘制然后截图
         return original ?? image.kf.normalized.kf.pngRepresentation()
     }
     

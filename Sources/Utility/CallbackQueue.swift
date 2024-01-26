@@ -26,6 +26,8 @@ public enum CallbackQueue {
     // 使用指定的 Queue.
     case dispatch(DispatchQueue)
     
+    // 最终其实还是使用 DiapatchQueue 进行调度.
+    // 各种 Case 的设计, 使得
     public func execute(_ block: @escaping () -> Void) {
         switch self {
         case .mainAsync:

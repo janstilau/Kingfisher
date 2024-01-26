@@ -128,7 +128,8 @@ public enum ImageCacheResult {
 /// While a default image cache object will be used if you prefer the extension methods of Kingfisher, you can create
 /// your own cache object and configure its storages as your need. This class also provide an interface for you to set
 /// the memory and disk storage config.
-//
+
+
 /// 表示一个混合缓存系统，由一个 `MemoryStorage.Backend` 和一个 `DiskStorage.Backend` 组成。
 /// `ImageCache` 是一个高级抽象，用于将图像及其数据存储到内存和磁盘中，并从中检索它们。
 ///
@@ -146,6 +147,9 @@ open class ImageCache {
     
     // ImageCache 是一个管理类, 真正的操作, 还是交给了对应的执行类.
     // 在真正的逻辑内部, 其实就不会使用太多的抽象类了
+    
+    // ImageCache 里面没有使用泛型的设计. MemoryStorage.Backend DiskStorage.Backend 虽然是泛型, 但是在这里固定了类型.
+    // 所以泛型在使用或者设计的时候, 其实想要的是固定类型的. 固定了类型, 就可以进行内存的更好的分配了. 但是这样, 失去的是替换实现的灵活性. 但是在自己的实现编码过程中, 很少真正的进行替换.
     
     // MARK: Public Properties
     /// The `MemoryStorage.Backend` object used in this cache. This storage holds loaded images in memory with a
@@ -182,6 +186,9 @@ open class ImageCache {
         ioQueue = DispatchQueue(label: ioQueueName)
         
         let notifications: [(Notification.Name, Selector)]
+        
+        // Tuple 在平时很少用, 但是如果在短小的代码块里面, 使用 Tuple 还是很好用的.
+        // 专门定义一个类型, 但没有任何的方法的加持, 使用 Tuple 也是很好用的.
 #if !os(macOS) && !os(watchOS)
         notifications = [
             (UIApplication.didReceiveMemoryWarningNotification, #selector(clearMemoryCache)),
@@ -239,6 +246,7 @@ open class ImageCache {
         let config = ImageCache.createConfig(
             name: name, cacheDirectoryURL: cacheDirectoryURL, diskCachePathClosure: diskCachePathClosure
         )
+        // 因为 DiskStorage.Backend 里面, 会有有关文件的操作, 所以需要进行 try 的处理.
         let diskStorage = try DiskStorage.Backend<Data>(config: config)
         self.init(memoryStorage: memoryStorage, diskStorage: diskStorage)
     }
@@ -263,6 +271,7 @@ open class ImageCache {
     }
     
     // 使用系统的 1/4 的内存.
+    // 作为上层的控件, 提供比较好用的方法, 来创建底层使用的控件
     private static func createMemoryStorage() -> MemoryStorage.Backend<KFCrossPlatformImage> {
         let totalMemory = ProcessInfo.processInfo.physicalMemory
         let costLimit = totalMemory / 4
@@ -295,8 +304,9 @@ open class ImageCache {
     
     
     // 下面就是一直在使用的公共的方法了.
+    // 下面的方法, 会有颗粒度. 我们使用 KF 的时候, 是不会使用到这么细颗粒度的东西的.
+    // 但是因为这些类是公开的, 所以使用者可以使用这些细颗粒度的东西, 进行操作.
     // MARK: Storing Images
-    
     open func store(_ image: KFCrossPlatformImage,
                     original: Data? = nil,
                     forKey key: String,
@@ -308,22 +318,28 @@ open class ImageCache {
         let identifier = options.processor.identifier
         let callbackQueue = options.callbackQueue
         
-        // 如果, imageProcessor 有 id 值, 那么在存储的时候, 也会使用到这个 id 值.
+        // 从这里看, 最终存储的时候, 还会和 processor.identifier 有关.
         let computedKey = key.computedKey(with: identifier)
+        
         // Memory storage should not throw.
+        // 首先是, 内存里面的存储.
         memoryStorage.storeNoThrow(value: image, forKey: computedKey, expiration: options.memoryCacheExpiration)
         
         guard toDisk else {
             if let completionHandler = completionHandler {
+                // 各种, 回调的处理, 其实还是要到 callbackQueue 中处理.
+                // 如果, 不存储到 disk, 还是认为磁盘存储成功了.
                 let result = CacheStoreResult(memoryCacheResult: .success(()), diskCacheResult: .success(()))
                 callbackQueue.execute { completionHandler(result) }
             }
             return
         }
         
+        // 使用闭包的这种方式, 那么闭包的处理方式, 就可以进行环境的调度了. 
         ioQueue.async {
             // 在 IOQueue 里面, 才进行磁盘相关的方法的调用. 
             let serializer = options.cacheSerializer
+            // 到底, 是如何进行 image 到 Data 的转化, 是使用接口对象进行的. 一般这种, 一定会到场景中使用的对象, 在创建的时候, 会有默认值. 
             if let data = serializer.data(with: image, original: original) {
                 self.syncStoreToDisk(
                     data,
@@ -334,6 +350,9 @@ open class ImageCache {
                     writeOptions: options.diskStoreWriteOptions,
                     completionHandler: completionHandler)
             } else {
+                // 存储到 Io 的时候出了, 会将错误的信息通过 completionHandler 进行回传.
+                // Result 类型, 也是一个 Enum 的盒子. 里面的 Error, 可以是任何的数据量.
+                // Error 本身, 其实就是一个 Protocol 而已.
                 guard let completionHandler = completionHandler else { return }
                 
                 let diskError = KingfisherError.cacheError(
@@ -383,6 +402,7 @@ open class ImageCache {
             }
         }
         
+        // 最终还是要汇集到 KingfisherParsedOptionsInfo 里面来.
         let options = KingfisherParsedOptionsInfo([
             .processor(TempProcessor(identifier: identifier)),
             .cacheSerializer(serializer),
@@ -411,6 +431,9 @@ open class ImageCache {
         }
     }
     
+    // 在功能设计的时候, 不免需要线程控制.
+    // 有的时候, 自己的已经忘记了, 到底需不需要控制了
+    // 这个时候, 清晰命名, 自己已经在相关的环境里可, 可以减少好多复杂度.
     private func syncStoreToDisk(
         _ data: Data,
         forKey key: String,
@@ -457,6 +480,8 @@ open class ImageCache {
     ///               If `false`, the image won't be removed from the disk storage. Default is `true`.
     ///   - callbackQueue: The callback queue on which `completionHandler` is invoked. Default is `.untouch`.
     ///   - completionHandler: A closure which is invoked when the cache removing operation finishes.
+    
+    // 就是调用 memory 和 disk 的相关 API, 然后最终回调.
     open func removeImage(forKey key: String,
                           processorIdentifier identifier: String = "",
                           fromMemory: Bool = true,
@@ -486,6 +511,7 @@ open class ImageCache {
     
     // MARK: Getting Images
     
+    // 
     /// Gets an image for a given key from the cache, either from memory storage or disk storage.
     ///
     /// - Parameters:
@@ -496,6 +522,7 @@ open class ImageCache {
     ///                        image retrieving operation finishes without problem, an `ImageCacheResult` value
     ///                        will be sent to this closure as result. Otherwise, a `KingfisherError` result
     ///                        with detail failing reason will be sent.
+    
     open func retrieveImage(
         forKey key: String,
         options: KingfisherParsedOptionsInfo,

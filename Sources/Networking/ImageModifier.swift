@@ -9,6 +9,9 @@ import UIKit
 /// the image. The `modify(_:)` method will be called after the image retrieved from its source and before it returned
 /// to the caller. This modified image is expected to be only used for rendering purpose, any changes applied by the
 /// `ImageModifier` will not be serialized or cached.
+/// `ImageModifier` 可用于在缓存序列化和实际使用图像之间更改图像的属性。
+/// `modify(_:)` 方法将在从其源获取图像后并在将其返回给调用者之前调用。预期仅使用由 `ImageModifier` 应用于呈现的图像，
+/// `ImageModifier` 应用的任何更改都不会被序列化或缓存。
 public protocol ImageModifier {
     /// Modify an input `Image`.
     ///
@@ -19,6 +22,14 @@ public protocol ImageModifier {
     /// - Note: The return value will be unmodified if modifying is not possible on
     ///         the current platform.
     /// - Note: Most modifiers support UIImage or NSImage, but not CGImage.
+    /// 修改输入的 `Image`。
+    ///
+    /// - parameter image:   将由 `self` 修改的图像
+    ///
+    /// - returns: 修改后的图像。
+    ///
+    /// - Note: 如果在当前平台上无法修改，则返回值将保持不变。
+    /// - Note: 大多数修改器支持 UIImage 或 NSImage，但不支持 CGImage。
     func modify(_ image: KFCrossPlatformImage) -> KFCrossPlatformImage
 }
 

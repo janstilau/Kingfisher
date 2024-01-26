@@ -32,6 +32,8 @@ public enum MemoryStorage {
     /// 它将被视为在存储中不存在。`MemoryStorage` 还包含一个预定的自清理任务，用于从内存中清除已过期的项目。
 
     // 真正的内存存储, 是使用了这个类来完成的.
+    // 在通用的第三方类库里面, 是大量的使用了泛型.
+    
     public class Backend<T: CacheCostCalculable> {
         // 直接使用了 NSCache 来做处理.
         // NSCache 这个类要求了, 存储的 Obj 必须是一个引用数据类型. NSCache 的内部, 本身其实是一个线程安全的对象. 但是在本类里面, 还是增加了锁.

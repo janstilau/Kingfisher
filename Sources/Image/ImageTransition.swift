@@ -18,6 +18,21 @@ import UIKit
 /// - flipFromTop: Flip from top transition.
 /// - flipFromBottom: Flip from bottom transition.
 /// - custom: Custom transition.
+
+/// 在由 Kingfisher 的 `UIImageView` 扩展 API 下载并设置的图像时使用的过渡效果。你可以在 `KingfisherOptionsInfo` 中分配一个带有过渡持续时间的枚举值作为动画过渡的选项之一。
+///
+/// 在底层使用了 Apple 的 UIViewAnimationOptions。
+/// 对于自定义过渡，你应该指定自己的过渡选项、动画和完成处理程序。
+///
+/// - none: 无动画过渡。
+/// - fade: 在给定的持续时间内淡入加载的图像。
+/// - flipFromLeft: 从左侧翻转过渡。
+/// - flipFromRight: 从右侧翻转过渡。
+/// - flipFromTop: 从顶部翻转过渡。
+/// - flipFromBottom: 从底部翻转过渡。
+/// - custom: 自定义过渡。
+
+// 使用 Enum 当做存储器. 如果不是 Node, 每种 case, 其实都会有 duration 的存储.
 public enum ImageTransition {
     /// No animation transition.
     case none
@@ -31,6 +46,7 @@ public enum ImageTransition {
     case flipFromTop(TimeInterval)
     /// Flip from bottom transition.
     case flipFromBottom(TimeInterval)
+
     /// Custom transition defined by a general animation block.
     ///    - duration: The time duration of this custom transition.
     ///    - options: `UIView.AnimationOptions` should be used in the transition.
@@ -41,6 +57,8 @@ public enum ImageTransition {
               animations: ((UIImageView, UIImage) -> Void)?,
               completion: ((Bool) -> Void)?)
     
+    
+    // enum 的常态. 在各种方法里面, 基本上都是 switch self 做处理.
     var duration: TimeInterval {
         switch self {
         case .none:                          return 0
@@ -69,6 +87,7 @@ public enum ImageTransition {
         }
     }
     
+    // 动作这件事. 如果是系统的 option, 就是 { $0.image = $1 }
     var animations: ((UIImageView, UIImage) -> Void)? {
         switch self {
         case .custom(_, _, let animations, _): return animations

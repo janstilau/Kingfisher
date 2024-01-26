@@ -60,6 +60,7 @@ public extension CacheSerializer {
 public struct DefaultCacheSerializer: CacheSerializer {
     
     /// The default general cache serializer used across Kingfisher's cache.
+    // 默认的各种, 一定要提供 default 给外界使用. 减少使用者的负担.
     public static let `default` = DefaultCacheSerializer()
 
     /// The compression quality when converting image to a lossy format data. Default is 1.0.
@@ -93,6 +94,7 @@ public struct DefaultCacheSerializer: CacheSerializer {
     /// Only when `original` contains valid PNG, JPEG and GIF format data, the `image` will be
     /// converted to the corresponding data type. Otherwise, if the `original` is provided but it is not
     /// If `original` is `nil`, the input `image` will be encoded as PNG data.
+    // 如何将 UIImage 变为 Data.
     public func data(with image: KFCrossPlatformImage, original: Data?) -> Data? {
         if preferCacheOriginalData {
             return original ??
