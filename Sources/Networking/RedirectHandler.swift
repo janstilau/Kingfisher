@@ -19,6 +19,8 @@ public protocol ImageDownloadRedirectHandler {
     ///   - response: The response received during redirection.
     ///   - newRequest: The request for redirection which can be modified.
     ///   - completionHandler: A closure for being called with modified request.
+    
+    // 重定向的处理. 
     func handleHTTPRedirection(
         for task: SessionDataTask,
         response: HTTPURLResponse,

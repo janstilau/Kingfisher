@@ -3,12 +3,14 @@ import Foundation
 
 /// Represents a session data task in `ImageDownloader`. It consists of an underlying `URLSessionDataTask` and
 /// an array of `TaskCallback`. Multiple `TaskCallback`s could be added for a single downloading data task.
+
 public class SessionDataTask {
 
     /// Represents the type of token which used for cancelling a task.
     public typealias CancelToken = Int
 
     struct TaskCallback {
+        // 对于 Image 来说, 他就记录最后 Complete 的回调.
         let onCompleted: Delegate<Result<ImageLoadingResult, KingfisherError>, Void>?
         let options: KingfisherParsedOptionsInfo
     }
@@ -56,6 +58,7 @@ public class SessionDataTask {
     func addCallback(_ callback: TaskCallback) -> CancelToken {
         lock.lock()
         defer { lock.unlock() }
+        
         callbacksStore[currentToken] = callback
         defer { currentToken += 1 }
         return currentToken

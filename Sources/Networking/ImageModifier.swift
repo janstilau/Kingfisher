@@ -9,6 +9,7 @@ import UIKit
 /// the image. The `modify(_:)` method will be called after the image retrieved from its source and before it returned
 /// to the caller. This modified image is expected to be only used for rendering purpose, any changes applied by the
 /// `ImageModifier` will not be serialized or cached.
+
 /// `ImageModifier` 可用于在缓存序列化和实际使用图像之间更改图像的属性。
 /// `modify(_:)` 方法将在从其源获取图像后并在将其返回给调用者之前调用。预期仅使用由 `ImageModifier` 应用于呈现的图像，
 /// `ImageModifier` 应用的任何更改都不会被序列化或缓存。

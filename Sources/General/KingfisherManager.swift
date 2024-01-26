@@ -483,6 +483,7 @@ public class KingfisherManager {
 
         switch source {
         case .network(let resource):
+            // 从这里开始, 进行真正的图片下载的服务. 
             let downloader = options.downloader ?? self.downloader
             let task = downloader.downloadImage(
                 with: resource.downloadURL, options: options, completionHandler: _cacheImage

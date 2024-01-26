@@ -229,12 +229,24 @@ open class ImageDownloader {
         }
 
         // Creates default request.
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: downloadTimeout)
+        var request = URLRequest(url: url,
+                                 cachePolicy: .reloadIgnoringLocalCacheData,
+                                 timeoutInterval: downloadTimeout)
+        /*
+         HTTP 管线化是一种优化 HTTP 请求的机制，允许在单个 TCP 连接上并发发送多个请求而无需等待响应。这可以减少请求的往返时间，提高网络性能。
+
+         如果将 httpShouldUsePipelining 设置为 true，则表示允许 HTTP 管线化。这样，多个请求可以在一个连接上同时进行，而无需等待前一个请求的响应。这在一些情况下可以提高网络效率，特别是对于高延迟的连接。
+
+         如果将 httpShouldUsePipelining 设置为 false，则禁用 HTTP 管线化，每个请求都需要等待前一个请求的响应完成后才能发送。这可能会在一定程度上增加请求的总时间，但有时也可以避免一些潜在的问题，例如某些服务器不支持管线化或存在网络代理问题。
+
+         在特定情况下，你可能需要根据网络环境和服务器的支持情况来调整此配置，以获得最佳的性能和稳定性。
+         */
         request.httpShouldUsePipelining = requestsUsePipelining
         if #available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *) , options.lowDataModeSource != nil {
             request.allowsConstrainedNetworkAccess = false
         }
 
+        // 在真正的发送下载请求之前, 可以有一次修改的过程. 
         if let requestModifier = options.requestModifier {
             // Modifies request before sending.
             requestModifier.modified(for: request) { result in
@@ -256,6 +268,7 @@ open class ImageDownloader {
     {
         // Ready to start download. Add it to session task manager (`sessionHandler`)
         let downloadTask: DownloadTask
+        // 这里有一个减少下载的处理. 
         if let existingTask = sessionDelegate.task(for: context.url) {
             downloadTask = sessionDelegate.append(existingTask, callback: callback)
         } else {
@@ -351,6 +364,7 @@ open class ImageDownloader {
         return downloadTask
     }
 
+    // 以上的各种方法, 都是 private 的, 就是供下面的工具方法使用的.
     // MARK: Downloading Task
     /// Downloads an image with a URL and option. Invoked internally by Kingfisher. Subclasses must invoke super.
     ///
@@ -367,7 +381,9 @@ open class ImageDownloader {
         completionHandler: ((Result<ImageLoadingResult, KingfisherError>) -> Void)? = nil) -> DownloadTask?
     {
         var downloadTask: DownloadTask?
+        // 这是一个同步方法.
         createDownloadContext(with: url, options: options) { result in
+            // 这里是一个盒子的模型. 将所有的数据, 都放到 context 里面, 然后一并交给后面的流程.
             switch result {
             case .success(let context):
                 // `downloadTask` will be set if the downloading started immediately. This is the case when no request
