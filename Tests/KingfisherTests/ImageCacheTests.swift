@@ -12,6 +12,7 @@ class ImageCacheTests: XCTestCase {
 
         let uuid = UUID().uuidString
         let cacheName = "test-\(uuid)"
+        // ImageCache 里面, 会根据 Name, 来进行对应的文件路径的创建.
         cache = ImageCache(name: cacheName)
     }
     
@@ -26,6 +27,11 @@ class ImageCacheTests: XCTestCase {
     func testInvalidCustomCachePath() {
         let customPath = "/path/to/image/cache"
         let url = URL(fileURLWithPath: customPath)
+        // 使用, XCTAssertThrowsError 这种方法,  可以去测试带有 throw 的方法.
+        // XCTAssertThrowsError 用来测试, 一定会抛出错误.
+        // XCTAssertNoThrow 用来测试, 不会抛出错误.
+        
+        // 测试, 给一个非法的地址, 不能生成对应的 ImageCache.
         XCTAssertThrowsError(try ImageCache(name: "test", cacheDirectoryURL: url)) { error in
             guard case KingfisherError.cacheError(reason: .cannotCreateDirectory(let path, _)) = error else {
                 XCTFail("Should be KingfisherError with cacheError reason.")
@@ -42,6 +48,7 @@ class ImageCacheTests: XCTestCase {
 
         let customPath = subFolder.path
         let cache = try! ImageCache(name: "test", cacheDirectoryURL: subFolder)
+        // 测试, 使用 Test 为名称, 可以
         XCTAssertEqual(
             cache.diskStorage.directoryURL.path,
             (customPath as NSString).appendingPathComponent("com.onevcat.Kingfisher.ImageCache.test"))
@@ -49,6 +56,7 @@ class ImageCacheTests: XCTestCase {
     }
     
     func testCustomCachePathByBlock() {
+        // 可以在框架的基础上, 自己定义存图的位置.
         let cache = try! ImageCache(name: "test", cacheDirectoryURL: nil, diskCachePathClosure: { (url, path) -> URL in
             let modifiedPath = path + "-modified"
             return url.appendingPathComponent(modifiedPath, isDirectory: true)
@@ -62,6 +70,7 @@ class ImageCacheTests: XCTestCase {
     }
     
     func testMaxCachePeriodInSecond() {
+        // 在 Config 中修改了配置, 那么使用的地方, 可以直接看到影响.
         cache.diskStorage.config.expiration = .seconds(1)
         XCTAssertEqual(cache.diskStorage.config.expiration.timeInterval, 1)
     }
@@ -77,14 +86,17 @@ class ImageCacheTests: XCTestCase {
     }
     
     func testClearDiskCache() {
+        // 对于这种异步的操作, 就是需要使用 expectation 才可以完成处理.
         let exp = expectation(description: #function)
         let key = testKeys[0]
         cache.store(testImage, original: testImageData, forKey: key, toDisk: true) { _ in
             self.cache.clearMemoryCache()
             let cacheResult = self.cache.imageCachedType(forKey: key)
+            // 提前把内存缓存清理了, 然后得到的, 就应该是 disk 的缓存的.
             XCTAssertTrue(cacheResult.cached)
             XCTAssertEqual(cacheResult, .disk)
         
+            // 然后把 disk 的也清理了, 得到的, 就应该是没有缓存的.
             self.cache.clearDiskCache {
                 let cacheResult = self.cache.imageCachedType(forKey: key)
                 XCTAssertFalse(cacheResult.cached)
@@ -95,6 +107,7 @@ class ImageCacheTests: XCTestCase {
     }
     
     func testClearMemoryCache() {
+        // 上面的测试, 应该算已经测过这个场景了.
         let exp = expectation(description: #function)
         let key = testKeys[0]
         cache.store(testImage, original: testImageData, forKey: key, toDisk: true) { _ in

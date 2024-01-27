@@ -52,6 +52,7 @@ let testImageJEPGData = testImage.kf.jpegRepresentation(compressionQuality: 1.0)
 let testImageGIFData = Data(fileName: "dancing-banana.gif")
 let testImageSingleFrameGIFData = Data(fileName: "single-frame.gif")
 
+// 提前需要准备好, 各种的图片路径. 
 let testKeys = [
     "http://stackoverflow.com/questions/11251340/convert-image-to-base64-string-in-ios-swift",
     "https://onevcat.com",
@@ -67,6 +68,7 @@ func cleanDefaultCache() {
     try? cache.diskStorage.removeAll()
 }
 
+// 
 func clearCaches(_ caches: [ImageCache]) {
     for c in caches {
         c.clearMemoryCache()
