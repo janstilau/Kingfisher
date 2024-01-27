@@ -82,7 +82,7 @@ open class SessionDelegate: NSObject {
         return DownloadTask(sessionTask: task, cancelToken: token)
     }
 
-    // 全都取消了, 或者下载完成了, 会走真正清理的逻辑. 
+    // 全都取消了, 或者下载完成了, 会走真正清理的逻辑.
     private func remove(_ task: SessionDataTask) {
         lock.lock()
         defer { lock.unlock() }
@@ -136,6 +136,7 @@ open class SessionDelegate: NSObject {
 // 这里是对应 URLSession 的 Delegate 各种事件的包赚.
 extension SessionDelegate: URLSessionDataDelegate {
 
+    // 各种事件中, 使用各种 Delegate 对象进行和 ImageDownloader 的通信.
     open func urlSession(
         _ session: URLSession,
         dataTask: URLSessionDataTask,

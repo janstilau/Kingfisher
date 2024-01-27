@@ -7,6 +7,7 @@ import AppKit
 import UIKit
 #endif
 
+// 使用 .kf.的方式, 进行各种方法的添加.
 extension KingfisherWrapper where Base: KFCrossPlatformImageView {
 
     // MARK: Setting Image
@@ -284,9 +285,11 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
         }
 
         if let block = progressBlock {
+            // 各种逻辑, 都放到了. options 里面.
             options.onDataReceived = (options.onDataReceived ?? []) + [ImageLoadingProgressSideEffect(block)]
         }
 
+        // UI层, 还是使用 KingfisherManager.shared.retrieveImage 来进行各种逻辑处理. 只不过最后的回调里面,进行将下载的图片, 添加到 UI 层的处理.
         let task = KingfisherManager.shared.retrieveImage(
             with: source,
             options: options,
@@ -399,6 +402,7 @@ private var indicatorTypeKey: Void?
 private var placeholderKey: Void?
 private var imageTaskKey: Void?
 
+// 想要给已有的类, 添加各种属性, 只能是通过了 关联对象的方法.
 extension KingfisherWrapper where Base: KFCrossPlatformImageView {
 
     // MARK: Properties
@@ -447,6 +451,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
                 previousIndicator.view.removeFromSuperview()
             }
             
+            // 在 set, get 里面, 可以根据各种性质, 进行相关的逻辑触发. 这没有问题.
             // Add new
             if let newIndicator = newValue {
                 // Set default indicator layout

@@ -486,6 +486,15 @@ extension KingfisherWrapper where Base: KFCrossPlatformImage {
     ///
     /// - Note: This method only works for CG-based image. The current image scale is kept.
     ///         For any non-CG-based image or animated image, `base` itself is returned.
+    
+    /// 返回给定比例下的 `base` 图像的解码图像。它将在普通上下文中绘制图像并从中返回数据。
+    /// 当图像刚刚从数据中创建而尚未首次显示时，这可以提高绘制性能。
+
+    /// - Parameter scale: 目标图像应具有的给定比例。
+    /// - Returns: 已解码的图像，准备好显示。
+
+    /// - Note: 此方法仅适用于基于 CG 的图像。当前的图像比例保持不变。
+    ///         对于任何非基于 CG 的图像或动画图像，将返回 `base` 本身。
     public func decoded(scale: CGFloat) -> KFCrossPlatformImage {
         // Prevent animated image (GIF) losing it's images
         #if os(iOS) || os(visionOS)

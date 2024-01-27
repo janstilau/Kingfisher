@@ -16,6 +16,7 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   - downloader: The `ImageDownloader` object which is used for the downloading operation.
     ///   - url: URL of the starting request.
     ///   - request: The request object for the download process.
+    // 开始下载图片的时候, 会调用到这里.
     func imageDownloader(_ downloader: ImageDownloader, willDownloadImageForURL url: URL, with request: URLRequest?)
 
     /// Called when the `ImageDownloader` completes a downloading request with success or failure.
@@ -25,6 +26,7 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   - url: URL of the original request URL.
     ///   - response: The response object of the downloading process.
     ///   - error: The error in case of failure.
+    // 下载完毕了之后, 会调用到这里.
     func imageDownloader(
         _ downloader: ImageDownloader,
         didFinishDownloadingImageForURL url: URL,
@@ -46,6 +48,7 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   processing flow if you find the data is corrupted or malformed.
     ///
     ///  If this method is implemented, `imageDownloader(_:didDownload:for:)` will not be called anymore.
+    // 当下载完毕之后, 会有这样的一个机会, 进行 Data 的修改.
     func imageDownloader(_ downloader: ImageDownloader, didDownload data: Data, with dataTask: SessionDataTask) -> Data?
   
     /// Called when the `ImageDownloader` object successfully downloaded image data from specified URL. This is
@@ -66,6 +69,7 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   processing flow if you find the data is corrupted or malformed.
     ///
     ///   If `imageDownloader(_:didDownload:with:)` is implemented, this method will not be called anymore.
+    // 当下载完毕之后, 会有这样的一个机会, 进行 Data 的修改.
     func imageDownloader(_ downloader: ImageDownloader, didDownload data: Data, for url: URL) -> Data?
 
     /// Called when the `ImageDownloader` object successfully downloads and processes an image from specified URL.
@@ -75,7 +79,7 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   - image: The downloaded and processed image.
     ///   - url: URL of the original request URL.
     ///   - response: The original response object of the downloading process.
-    ///
+    // 不但下载完毕了, 还进行了相关的图片生成了.
     func imageDownloader(
         _ downloader: ImageDownloader,
         didDownload image: KFCrossPlatformImage,
@@ -93,6 +97,7 @@ public protocol ImageDownloaderDelegate: AnyObject {
     /// - Returns: Returns a value to indicate whether this HTTP status code is valid or not.
     /// - Note: If the default 200 to 400 valid code does not suit your need,
     ///         you can implement this method to change that behavior.
+    // 在得到 Http 响应的时候, 可以实现判断是否是一个合法的响应.
     func isValidStatusCode(_ code: Int, for downloader: ImageDownloader) -> Bool
 
     /// Called when the task has received a valid HTTP response after it passes other checks such as the status code.
@@ -112,6 +117,7 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   - response: The original response object of the downloading process.
     ///   - completionHandler: A completion handler that receives the disposition for the download task. You must call
     ///   this handler with either `.allow` or `.cancel`.
+    // 类似于 response 的回调处理. 
     func imageDownloader(
         _ downloader: ImageDownloader,
         didReceive response: URLResponse,

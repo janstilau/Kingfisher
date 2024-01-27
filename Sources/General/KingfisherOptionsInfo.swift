@@ -311,6 +311,12 @@ public enum KingfisherOptionsInfoItem {
     /// This option is useful if you want to implement a fallback solution for setting image.
     ///
     /// User cancellation will not trigger the alternative source loading.
+    /// 当原始输入的 `Source` 失败时，将使用备用源。如果由于错误而导致前一个任务失败，将使用关联数组中的 `Source` 启动新的图像加载任务。
+    /// 只要成功加载一个源，图像源加载过程就会停止。如果使用了所有 `[Source]`，但加载仍然失败，将抛出一个具有 `alternativeSourcesExhausted` 作为其原因的 `imageSettingError`。
+
+    /// 如果要实现图像的备用解决方案，此选项非常有用。
+
+    /// 用户取消不会触发备用源加载。
     case alternativeSources([Source])
 
     /// Provide a retry strategy which will be used when something gets wrong during the image retrieving process from
@@ -322,6 +328,12 @@ public enum KingfisherOptionsInfoItem {
     /// `KingfisherManager`, so the retry strategy also applies when using them. However, this option does not apply
     /// when pass to an `ImageDownloader` or `ImageCache`.
     ///
+    /// 提供在从 `KingfisherManager` 中检索图像过程中发生问题时将使用的重试策略。您可以通过创建符合 `RetryStrategy` 协议的类型来定义策略。
+
+    /// - Note:
+
+    /// Kingfisher 的所有扩展方法（`UIImageView` 或 `UIButton` 上的 `kf` 扩展）都通过 `KingfisherManager` 检索图像，
+    /// 因此在使用它们时，重试策略也适用。但是，当传递给 `ImageDownloader` 或 `ImageCache` 时，此选项不适用。
     case retryStrategy(RetryStrategy)
 
     /// The `Source` should be loaded when user enables Low Data Mode and the original source fails with an
@@ -332,22 +344,11 @@ public enum KingfisherOptionsInfoItem {
     ///
     /// If not set or the `source` is `nil`, the device Low Data Mode will be ignored and the original source will
     /// be loaded following the system default behavior, in a normal way.
-    case lowDataMode(Source?)
-    
-    
     /*
-     processingQueue:
-     决定图像处理应该在哪个队列中进行。默认情况下，Kingfisher 使用预定义的串行队列来处理图像。使用此选项更改此行为。
-     progressiveJPEG:
-     启用渐进式图像加载，Kingfisher 将使用关联的 ImageProgressive 值来处理渐进式 JPEG 数据并以渐进式方式显示它。
-     alternativeSources:
-     当原始输入 Source 失败时，将使用替代源。关联数组中的 Source 将用于启动新的图像加载任务，如果由于错误导致上一个任务失败，则图像源加载过程将在加载成功时立即停止。
-     retryStrategy:
-     在从 KingfisherManager 检索图像的过程中出现问题时提供的重试策略。您可以创建符合 RetryStrategy 协议的类型来定义策略。
-     lowDataMode:
      当用户启用低数据模式并且原始源由于 NSURLErrorNetworkUnavailableReason.constrained 错误而失败时，应加载的 Source。如果设置了此选项，原始源的请求的 allowsConstrainedNetworkAccess 属性将设置为 false，并且将使用关联值中的 Source 在低数据模式下检索图像。通常，您可以提供图像的低分辨率版本或本地图像提供程序来显示占位符。
      如果未设置或 source 为 nil，则会忽略设备的低数据模式，并按照系统的默认行为正常加载原始源。
      */
+    case lowDataMode(Source?)
 }
 
 /*

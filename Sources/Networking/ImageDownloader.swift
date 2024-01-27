@@ -117,6 +117,8 @@ open class ImageDownloader {
     /// 您可以在下载任务开始之前更改配置。
     /// 要求为下载器正确工作的配置不应具有用于缓存的持久存储。
     // 默认, KF 下载是不适用缓存的. 这其实是可以理解的, 本来图片就不是业务数据. 没有缓存的价值.
+    
+    // 各种的, 和 Session 相关的配置, 设置了之后都要重新进行设置.
     open var sessionConfiguration = URLSessionConfiguration.ephemeral {
         didSet {
             session.invalidateAndCancel()
@@ -139,6 +141,8 @@ open class ImageDownloader {
     
     /// A responder for authentication challenge. 
     /// Downloader will forward the received authentication challenge for the downloading session to this responder.
+    // 应该如何应对证书验证这回事, 这个协议有着自己的实现.
+    // 默认是 Self.
     open weak var authenticationChallengeResponder: AuthenticationChallengeResponsible?
 
     private let name: String
@@ -157,6 +161,7 @@ open class ImageDownloader {
 
         self.name = name
 
+        // 在自己的业务, 开创一个 URLSession, 是一个非常好的习惯.
         sessionDelegate = SessionDelegate()
         session = URLSession(
             configuration: sessionConfiguration,
@@ -171,10 +176,18 @@ open class ImageDownloader {
     deinit { session.invalidateAndCancel() }
 
     private func setupSessionHandler() {
+        /*
+         sessionDelegate 是实际的 URLSession 的 Delegate, 里面有着各种 URLSession 的事件.
+         但是还是需要配置逻辑. 因为 SessionDelegate 要和其他的类交互.
+         所以它里面的有着大量的 Delegate 对象需要配置. 这个配置的过程, 就是和 ImageDownloader 进行交互的过程.
+         */
         sessionDelegate.onReceiveSessionChallenge.delegate(on: self) { (self, invoke) in
+            // 当, Session 遇到了证书相关的限制, 应该如何做.
+            // 将如何做, 还是交给了自己的抽象层.
             self.authenticationChallengeResponder?.downloader(self, didReceive: invoke.1, completionHandler: invoke.2)
         }
         sessionDelegate.onReceiveSessionTaskChallenge.delegate(on: self) { (self, invoke) in
+            // 当, Task 遇到了证书相关的限制, 应该如何做.
             self.authenticationChallengeResponder?.downloader(
                 self, task: invoke.1, didReceive: invoke.2, completionHandler: invoke.3)
         }
@@ -199,6 +212,7 @@ open class ImageDownloader {
     }
 
     // Wraps `completionHandler` to `onCompleted` respectively.
+    // 将, 回调转换成为 Delegate 的过程.
     private func createCompletionCallBack(_ completionHandler: ((DownloadResult) -> Void)?) -> Delegate<DownloadResult, Void>? {
         return completionHandler.map { block -> Delegate<DownloadResult, Void> in
 
@@ -291,6 +305,7 @@ open class ImageDownloader {
     }
 
 
+    // 各种, 给 Delegate 的通知, 有着统一的命名, 这是一个好的习惯.
     private func reportWillDownloadImage(url: URL, request: URLRequest) {
         delegate?.imageDownloader(self, willDownloadImageForURL: url, with: request)
     }
@@ -334,6 +349,7 @@ open class ImageDownloader {
             return downloadTask
         }
 
+        // 这里注册, 下载完成的回调.
         sessionTask.onTaskDone.delegate(on: self) { (self, done) in
             // Underlying downloading finishes.
             // result: Result<(Data, URLResponse?)>, callbacks: [TaskCallback]
@@ -348,6 +364,8 @@ open class ImageDownloader {
                 let processor = ImageDataProcessor(
                     data: data, callbacks: callbacks, processingQueue: context.options.processingQueue
                 )
+                // 真正的, 对于图像的处理, 放到了 ImageDataProcessor 里面.
+                // 统一的思路, 将后续处理放到了回调里面.
                 processor.onImageProcessed.delegate(on: self) { (self, done) in
                     // `onImageProcessed` will be called for `callbacks.count` times, with each
                     // `SessionDataTask.TaskCallback` as the input parameter.
@@ -357,6 +375,7 @@ open class ImageDownloader {
                     self.reportDidProcessImage(result: result, url: context.url, response: response)
 
                     let imageResult = result.map { ImageLoadingResult(image: $0, url: context.url, originalData: data) }
+                    // options 一直进行传递, 这样所需要的各种环境, 也就一直可以保持了下来. 
                     let queue = callback.options.callbackQueue
                     queue.execute { callback.onCompleted?.call(imageResult) }
                 }
@@ -371,6 +390,8 @@ open class ImageDownloader {
         }
 
         reportWillDownloadImage(url: context.url, request: context.request)
+        
+        // 在这里, 真正的开启任务.
         sessionTask.resume()
         return downloadTask
     }
@@ -493,6 +514,7 @@ extension ImageDownloader {
 extension ImageDownloader: AuthenticationChallengeResponsible {}
 
 // Use the default implementation from extension of `ImageDownloaderDelegate`.
+// ImageDownloaderDelegate 里面都有默认实现, 实现它, 只是声明一下而已
 extension ImageDownloader: ImageDownloaderDelegate {}
 
 extension ImageDownloader {

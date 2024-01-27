@@ -27,7 +27,10 @@ class ImageDataProcessor {
     private func doProcess() {
         var processedImages = [String: KFCrossPlatformImage]()
         for callback in callbacks {
+            // 每一种下图请求, 都可以配置自己的生成图片的算法.
+            // 所以, 这里是一步步的, 通过自己下图请求的配置生成图片, 然后回传.
             let processor = callback.options.processor
+            // 这里是为了避免, 重复生成. 因为, 同样的一个 Processor, 面对同样的一份 data, 一定是生成同样的一份 UIIMAGE
             var image = processedImages[processor.identifier]
             if image == nil {
                 image = processor.process(item: .data(data), options: callback.options)

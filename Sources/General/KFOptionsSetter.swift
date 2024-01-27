@@ -7,6 +7,7 @@ import AppKit
 import UIKit
 #endif
 
+// 一个工厂类.
 public protocol KFOptionSetter {
     var options: KingfisherParsedOptionsInfo { get nonmutating set }
 

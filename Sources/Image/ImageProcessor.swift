@@ -103,6 +103,7 @@ func !=(left: ImageProcessor, right: ImageProcessor) -> Bool {
 }
 
 typealias ProcessorImp = ((ImageProcessItem, KingfisherParsedOptionsInfo) -> KFCrossPlatformImage?)
+
 struct GeneralProcessor: ImageProcessor {
     let identifier: String
     let p: ProcessorImp
