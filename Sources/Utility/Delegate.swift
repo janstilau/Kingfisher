@@ -1,5 +1,6 @@
 
 import Foundation
+
 /// A class that keeps a weakly reference for `self` when implementing `onXXX` behaviors.
 /// Instead of remembering to keep `self` as weak in a stored closure:
 ///
@@ -42,7 +43,18 @@ import Foundation
 ///     }
 /// }
 /// ```
-///
+
+/*
+ 这里使用了泛型.
+ 其实这个类的主要功能, 其实就是存储一个 block.
+ 
+ 目前来说, 使用 Block 来进行操作, 是更加方便的方式.
+ 这种对象, 提供比较好用的方法, 进行扩展, 但是核心的存储对象就是一个 block.
+ */
+
+// Delegate 是一个盒子, 它是需要专门配置的.
+// 可以看到, 就是 delegate 方法, block 是一个 private 的属性, 需要主动调用 delegate 才能够将 block 填入值去.
+// 使用这种, 避免了 Init 的时候, 把各种 Block 设置为 Optional 的, 但是还是需要主动调用进行里面的 Block 的设置. 
 public class Delegate<Input, Output> {
     public init() {}
 

@@ -16,7 +16,6 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   - downloader: The `ImageDownloader` object which is used for the downloading operation.
     ///   - url: URL of the starting request.
     ///   - request: The request object for the download process.
-    ///
     func imageDownloader(_ downloader: ImageDownloader, willDownloadImageForURL url: URL, with request: URLRequest?)
 
     /// Called when the `ImageDownloader` completes a downloading request with success or failure.
@@ -26,7 +25,6 @@ public protocol ImageDownloaderDelegate: AnyObject {
     ///   - url: URL of the original request URL.
     ///   - response: The response object of the downloading process.
     ///   - error: The error in case of failure.
-    ///
     func imageDownloader(
         _ downloader: ImageDownloader,
         didFinishDownloadingImageForURL url: URL,

@@ -8,6 +8,7 @@ import UIKit
 typealias DownloadResult = Result<ImageLoadingResult, KingfisherError>
 
 /// Represents a success result of an image downloading progress.
+// 如果, 是一个网络下载的图片, 是一定会有这三项数据的. 
 public struct ImageLoadingResult {
 
     /// The downloaded image.
@@ -32,6 +33,7 @@ public struct ImageLoadingResult {
 }
 
 /// Represents a task of an image downloading process.
+// SessionDataTask 是真正的网络下载模块, DownloadTask 就是一个对他的引用. 主要是用来取消下载任务的.
 public struct DownloadTask {
 
     /// The `SessionDataTask` object bounded to this download task. Multiple `DownloadTask`s could refer
@@ -97,9 +99,12 @@ open class ImageDownloader {
     /// A set of trusted hosts when receiving server trust challenges. A challenge with host name contained in this
     /// set will be ignored. You can use this set to specify the self-signed site. It only will be used if you don't
     /// specify the `authenticationChallengeResponder`.
-    ///
+    // 主要是为了 self-signed 来实现的.
     /// If `authenticationChallengeResponder` is set, this property will be ignored and the implementation of
     /// `authenticationChallengeResponder` will be used instead.
+    
+    /// 一组在接收服务器信任挑战时被视为可信的主机。包含在此集合中的主机名的挑战将被忽略。您可以使用此集合指定自签名站点。仅当您未指定 `authenticationChallengeResponder` 时，它才会被使用。
+    /// 如果设置了 `authenticationChallengeResponder`，则此属性将被忽略，而将使用 `authenticationChallengeResponder` 的实现。
     open var trustedHosts: Set<String>?
     
     /// Use this to set supply a configuration for the downloader. By default,
@@ -107,6 +112,11 @@ open class ImageDownloader {
     ///
     /// You could change the configuration before a downloading task starts.
     /// A configuration without persistent storage for caches is requested for downloader working correctly.
+    
+    /// 使用此选项为下载器提供配置。默认情况下，将使用 NSURLSessionConfiguration.ephemeralSessionConfiguration()。
+    /// 您可以在下载任务开始之前更改配置。
+    /// 要求为下载器正确工作的配置不应具有用于缓存的持久存储。
+    // 默认, KF 下载是不适用缓存的. 这其实是可以理解的, 本来图片就不是业务数据. 没有缓存的价值.
     open var sessionConfiguration = URLSessionConfiguration.ephemeral {
         didSet {
             session.invalidateAndCancel()
@@ -153,6 +163,7 @@ open class ImageDownloader {
             delegate: sessionDelegate,
             delegateQueue: nil)
 
+        // 将抽象, 交给了自己. 
         authenticationChallengeResponder = self
         setupSessionHandler()
     }

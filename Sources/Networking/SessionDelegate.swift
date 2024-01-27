@@ -1,11 +1,13 @@
 
 import Foundation
 
-// 对于 URLSession 的分发处理. 
 // Represents the delegate object of downloader session. It also behave like a task manager for downloading.
+
+// 这是整个 URLSession 的 delegate.
 @objc(KFSessionDelegate) // Fix for ObjC header name conflicting. https://github.com/onevcat/Kingfisher/issues/1530
 open class SessionDelegate: NSObject {
 
+    // 使用 typealias, 可以使得代码更加的简练, 在下面的 Delegate 里面, 都是使用的这种办法.
     typealias SessionChallengeFunc = (
         URLSession,
         URLAuthenticationChallenge,
@@ -19,17 +21,19 @@ open class SessionDelegate: NSObject {
         (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
     )
 
+    // 这个是 URLSession 的整个 Delegate, 分发的时候, 是根据 URL 来的.
     private var tasks: [URL: SessionDataTask] = [:]
     private let lock = NSLock()
 
+    // 各种的网络交互, 最终是需要一个配置, 统一使用了这个 Delegate 对象.
     let onValidStatusCode = Delegate<Int, Bool>()
     let onResponseReceived = Delegate<(URLResponse, (URLSession.ResponseDisposition) -> Void), Void>()
     let onDownloadingFinished = Delegate<(URL, Result<URLResponse, KingfisherError>), Void>()
     let onDidDownloadData = Delegate<SessionDataTask, Data?>()
-
     let onReceiveSessionChallenge = Delegate<SessionChallengeFunc, Void>()
     let onReceiveSessionTaskChallenge = Delegate<SessionTaskChallengeFunc, Void>()
 
+    // 真正创建一个下载任务, 会在这里将对应的 SessionDataTask 进行注册.
     func add(
         _ dataTask: URLSessionDataTask,
         url: URL,
@@ -45,9 +49,12 @@ open class SessionDelegate: NSObject {
 
             let (token, callback) = value
 
+            // 每一个下图的请求, 在进行取消的时候, 都会触发自己的 callback, 传入对应的 Error.
             let error = KingfisherError.requestError(reason: .taskCancelled(task: task, token: token))
             task.onTaskDone.call((.failure(error), [callback]))
+            
             // No other callbacks waiting, we can clear the task now.
+            // 然后, 如果真的没有下载任务了, 才会进行 URLSessionDataTask 的取消工作.
             if !task.containsCallbacks {
                 let dataTask = task.task
 
@@ -55,6 +62,7 @@ open class SessionDelegate: NSObject {
                 self.remove(task)
             }
         }
+        
         let token = task.addCallback(callback)
         tasks[url] = task
         return DownloadTask(sessionTask: task, cancelToken: token)
@@ -74,6 +82,7 @@ open class SessionDelegate: NSObject {
         return DownloadTask(sessionTask: task, cancelToken: token)
     }
 
+    // 全都取消了, 或者下载完成了, 会走真正清理的逻辑. 
     private func remove(_ task: SessionDataTask) {
         lock.lock()
         defer { lock.unlock() }
@@ -124,6 +133,7 @@ open class SessionDelegate: NSObject {
     }
 }
 
+// 这里是对应 URLSession 的 Delegate 各种事件的包赚.
 extension SessionDelegate: URLSessionDataDelegate {
 
     open func urlSession(
