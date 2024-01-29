@@ -251,6 +251,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
     }
 
 
+    // 最终, 所有的实现都到了这里.
     func setImage(
         with source: Source?,
         placeholder: Placeholder? = nil,
@@ -260,6 +261,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
     {
         var mutatingSelf = self
         guard let source = source else {
+            // 如果没有 source, 还是完成了 placeholder 的添加.
             mutatingSelf.placeholder = placeholder
             mutatingSelf.taskIdentifier = nil
             completionHandler?(.failure(KingfisherError.imageSettingError(reason: .emptySource)))
@@ -300,6 +302,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
                 CallbackQueue.mainCurrentOrAsync.execute {
                     maybeIndicator?.stopAnimatingView()
                     guard issuedIdentifier == self.taskIdentifier else {
+                        // 如果, ImageView 已经使用了新的 Source, 其实会在 Completeion 里面报错的.
                         let reason: KingfisherError.ImageSettingErrorReason
                         do {
                             let value = try result.get()
@@ -319,6 +322,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
                     case .success(let value):
                         guard self.needsTransition(options: options, cacheType: value.cacheType) else {
                             mutatingSelf.placeholder = nil
+                            // 如果需要过渡, 才进行过渡动画.
                             self.base.image = value.image
                             completionHandler?(result)
                             return
@@ -396,13 +400,15 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
 }
 
 // MARK: - Associated Object
+// 良好的 Private 的管理.
 private var taskIdentifierKey: Void?
 private var indicatorKey: Void?
 private var indicatorTypeKey: Void?
 private var placeholderKey: Void?
 private var imageTaskKey: Void?
 
-// 想要给已有的类, 添加各种属性, 只能是通过了 关联对象的方法.
+// ImageView 是一个第三方的类库
+// 想要进行额外的数据的添加, 只能是使用关联值这个技术.
 extension KingfisherWrapper where Base: KFCrossPlatformImageView {
 
     // MARK: Properties
@@ -481,6 +487,7 @@ extension KingfisherWrapper where Base: KFCrossPlatformImageView {
             // Save in associated object
             // Wrap newValue with Box to workaround an issue that Swift does not recognize
             // and casting protocol for associate object correctly. https://github.com/onevcat/Kingfisher/issues/872
+            //
             setRetainedAssociatedObject(base, &indicatorKey, newValue.map(Box.init))
         }
     }
