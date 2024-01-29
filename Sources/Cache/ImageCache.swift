@@ -802,6 +802,7 @@ open class ImageCache {
     {
         let computedKey = key.computedKey(with: identifier)
         if memoryStorage.isCached(forKey: computedKey) { return .memory }
+        // 从文件系统, 进行数据的读取. 只判断是否存储, 和从中进行 Data 读取和转化是两回事. 
         if diskStorage.isCached(forKey: computedKey) { return .disk }
         return .none
     }

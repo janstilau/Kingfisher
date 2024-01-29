@@ -31,6 +31,7 @@ import WatchKit
 #endif
 #endif
 
+
 /// Wrapper for Kingfisher compatible types. This type provides an extension point for
 /// convenience methods in Kingfisher.
 public struct KingfisherWrapper<Base> {

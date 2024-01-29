@@ -5,6 +5,7 @@ import Foundation
 /// `Source.provider` source. Compared to `Source.network` member, it gives a chance
 /// to load some image data in your own way, as long as you can provide the data
 /// representation for the image.
+
 // 使用自己的方式, 记性图片的加载. 这个方式, 主要就是实现了 func data(handler: @escaping (Result<Data, Error>) -> Void)
 // 所以实际上这里也是可以使用异步的方式进行获取.
 public protocol ImageDataProvider {
@@ -15,7 +16,7 @@ public protocol ImageDataProvider {
     /// Provides the data which represents image. Kingfisher uses the data you pass in the
     /// handler to process images and caches it for later use.
     
-    // 统一使用了回调的方式, 来进行数据的返回.
+    // 使用回调的方式, 这样实现者其实可以来自由的发挥, 是不是异步的.
     /// - Parameter handler: The handler you should call when you prepared your data.
     ///                      If the data is loaded successfully, call the handler with
     ///                      a `.success` with the data associated. Otherwise, call it
@@ -82,6 +83,7 @@ public struct LocalFileImageDataProvider: ImageDataProvider {
     // 直接是就是使用 fileURL 的读取.
     // 要习惯使用 Result. 
     public func data(handler:@escaping (Result<Data, Error>) -> Void) {
+        // 直接使用 FileUrl 进行文件的读取.
         loadingQueue.execute {
             handler(Result(catching: { try Data(contentsOf: fileURL) }))
         }
@@ -141,6 +143,7 @@ public struct Base64ImageDataProvider: ImageDataProvider {
 
     // base64 的解析, 数据都在本地, 直接就是 handler 的调用了.
     public func data(handler: (Result<Data, Error>) -> Void) {
+        // 通过 Base64 进行解析, 是一个非常正常的操作. 所以, Data 专门为这个进行了相关的解析. 
         let data = Data(base64Encoded: base64String)!
         handler(.success(data))
     }

@@ -73,9 +73,7 @@ public enum KingfisherOptionsInfoItem {
     /// you want to display a changeable image behind the same url at the same app session, while avoiding download
     /// it for multiple times.
     
-    /// 从这里来看, 应该是同样的一个 URL, 可能会更改图片. 不过从来没用过.
-    /// 如果设置，Kingfisher 将首先尝试从内存缓存中检索图像。如果图像不在内存缓存中，它将忽略磁盘缓存，而从网络重新下载图像。
-    /// 当你想在同一应用程序会话中在相同的 URL 背后显示一个可变的图像，同时避免多次下载它时，这是非常有用的。
+    // 只存内存里面进行取值, 不从文件系统进行读取. 
     case fromMemoryCacheOrRefresh
     
     /// If set, setting the image to an image view will happen with transition even when retrieved from cache.

@@ -39,12 +39,12 @@ public enum Source {
     
     /// The target image should be got from network remotely. The associated `Resource`
     /// value defines detail information like image URL and cache key.
-    // 从网络获取数据
+    // 从网络获取数据, 具体从哪里获取, 是 Resource 这个类型里面提供.
     case network(Resource)
     
     /// The target image should be provided in a data format. Normally, it can be an image
     /// from local storage or in any other encoding format (like Base64).
-    // 应该是本地就有这份数据. 
+    // 应该是本地就有这份数据. 具体数据是什么, ImageDataProvider 会提供. 
     case provider(ImageDataProvider)
 
     // MARK: Getting Properties

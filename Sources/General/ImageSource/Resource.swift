@@ -26,6 +26,8 @@ extension Resource {
     // 各个数据类型, 应该主动的提供它相配合的数据类型之间的转化. 这在自己的工作里面, 也是经常会用到.
     public func convertToSource(overrideCacheKey: String? = nil) -> Source {
         let key = overrideCacheKey ?? cacheKey
+        
+        // 根据是否是 File, 这里会区分 provider 和 network.
         return downloadURL.isFileURL ?
             .provider(LocalFileImageDataProvider(fileURL: downloadURL, cacheKey: key)) :
             .network(KF.ImageResource(downloadURL: downloadURL, cacheKey: key))
@@ -40,6 +42,8 @@ extension KF {
     /// ImageResource is a simple combination of `downloadURL` and `cacheKey`.
     /// When passed to image view set methods, Kingfisher will try to download the target
     /// image from the `downloadURL`, and then store it with the `cacheKey` as the key in cache.
+    
+    // Resource 的默认对象, 直接完成了对于 downloadURL, cacheKey 的存储.
     public struct ImageResource: Resource {
 
         // MARK: - Initializers
@@ -68,6 +72,7 @@ extension KF {
 /// URL conforms to `Resource` in Kingfisher.
 /// The `absoluteString` of this URL is used as `cacheKey`. And the URL itself will be used as `downloadURL`.
 /// If you need customize the url and/or cache key, use `ImageResource` instead.
+
 // 使用抽象接口, 一定要把原来想要抽象出来的数据类型, 进行相关的协议的实现.
 // 不能影响到, 原有的数据类型的使用.
 extension URL: Resource {

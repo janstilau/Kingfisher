@@ -116,6 +116,7 @@ struct GeneralProcessor: ImageProcessor {
 /// Images of .PNG, .JPEG and .GIF format are supported.
 /// If an image item is given as `.image` case, `DefaultImageProcessor` will
 /// do nothing on it and return the associated image.
+// DefaultImageProcessor 就是使用, 系统提供的各种 UIImage 函数, 进行转化. 
 public struct DefaultImageProcessor: ImageProcessor {
     
     /// A default `DefaultImageProcessor` could be used across.

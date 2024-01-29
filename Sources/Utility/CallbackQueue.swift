@@ -1,6 +1,8 @@
 
 import Foundation
 
+// Callback, 更多的是回调的含义.
+// 但是在整个的图像处理的过程里面, 会有 Execution 的概念.
 public typealias ExecutionQueue = CallbackQueue
 
 /// Represents callback queue behaviors when an calling of closure be dispatched.
@@ -57,6 +59,7 @@ extension DispatchQueue {
     // This method will dispatch the `block` to self.
     // If `self` is the main queue, and current thread is main thread, the block
     // will be invoked immediately instead of being dispatched.
+    // 这里的命名不好, 应该有 Main 相关的命名才对. 
     func safeAsync(_ block: @escaping () -> Void) {
         if self === DispatchQueue.main && Thread.isMainThread {
             block()
