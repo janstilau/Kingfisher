@@ -352,7 +352,7 @@ public class KingfisherManager {
      要么是 retrieveImageFromCache
      要么是 loadAndCacheImage
      所有的, 都是传递回调和 context.
-     将盒子进行传递. 
+     将盒子进行传递.
      */
     private func retrieveImage(
         with source: Source,
@@ -396,6 +396,8 @@ public class KingfisherManager {
         completionHandler: ((Result<ImageLoadingResult, KingfisherError>) -> Void)?)
     {
         guard let  completionHandler = completionHandler else { return }
+        // 所有的, 都是使用回调的方式 .
+        // 那么就需要进行良好的代码组织, 不要进行大量的 block 的嵌套. 
         provider.data { result in
             switch result {
             case .success(let data):
@@ -448,6 +450,7 @@ public class KingfisherManager {
                 originalSource: context.originalSource,
                 data: {  value.originalData }
             )
+            // 真正的缓存操作.
             // Add image to cache.
             let targetCache = options.targetCache ?? self.cache
             targetCache.store(
@@ -467,6 +470,7 @@ public class KingfisherManager {
             
             if needToCacheOriginalImage {
                 let originalCache = options.originalCache ?? targetCache
+                // 原始数据的保存工作.
                 originalCache.storeToDisk(
                     value.originalData,
                     forKey: source.cacheKey,
@@ -485,6 +489,7 @@ public class KingfisherManager {
             }
             
         case .failure(let error):
+            // 失败了. 直接就报错
             completionHandler?(.failure(error))
         }
     }
@@ -497,6 +502,7 @@ public class KingfisherManager {
     {
         let options = context.options
         func _cacheImage(_ result: Result<ImageLoadingResult, KingfisherError>) {
+            // 替换了原来的回调. 在原来的回调里面, 增加了缓存的操作.
             cacheImage(
                 source: source,
                 options: options,
@@ -506,6 +512,8 @@ public class KingfisherManager {
             )
         }
         
+        // 不同的 source 有着不同的处理策略
+        // 可以是网络下载, 也可以是直接使用 Provider 进行数据的提取.
         switch source {
         case .network(let resource):
             // 从这里开始, 进行真正的图片下载的服务.
@@ -790,6 +798,7 @@ class CacheCallbackCoordinator {
         self.stateQueue = DispatchQueue(label: stateQueueName)
     }
     
+    // 这里有一个状态机的变化处理.
     func apply(_ action: Action, trigger: () -> Void) {
         switch (state, action) {
         case (.done, _):

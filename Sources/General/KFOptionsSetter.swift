@@ -7,7 +7,7 @@ import AppKit
 import UIKit
 #endif
 
-// 一个工厂类.
+// 这个工程类, 是进行 KingfisherParsedOptionsInfo 相关的数据配置.
 public protocol KFOptionSetter {
     var options: KingfisherParsedOptionsInfo { get nonmutating set }
 
